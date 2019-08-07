@@ -53,7 +53,7 @@ ircmsg_parse(const uint8_t *buf,
 		// which may contain whitespaces, jump to the next
 		// character to seek for the next message token.
 		if (!is_tail_param && is_irc_whitespace (*iter)) {
-			head = iter;
+		        head = iter + 1;
 		}
 
 		// The IRC spec specifies that messages are terminated by
