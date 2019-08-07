@@ -36,19 +36,19 @@ typedef struct
 	void (*const start_message)(void *user_data);
 
 	void (*const start_tags)(void *user_data);
-	void (*const on_tag)(uint8_t *name, size_t name_len,
-			     uint8_t *esc_value, size_t esc_value_len,
+	void (*const on_tag)(const uint8_t *name, size_t name_len,
+			     const uint8_t *esc_value, size_t esc_value_len,
 			     void *user_data);
 	void (*const end_tags)(void *user_data);
 
-	void (*const on_prefix)(uint8_t *prefix, size_t prefix_len,
+	void (*const on_prefix)(const uint8_t *prefix, size_t prefix_len,
 				void *user_data);
 
-	void (*const on_command)(uint8_t *command, size_t command_len,
+	void (*const on_command)(const uint8_t *command, size_t command_len,
 				 void *user_data);
 
 	void (*const start_params)(void *user_data);
-	void (*const on_param)(uint8_t *param, size_t param_len,
+	void (*const on_param)(const uint8_t *param, size_t param_len,
 			       void *user_data);
 	void (*const end_params)(void *user_data);
 
