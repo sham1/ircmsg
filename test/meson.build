@@ -16,4 +16,13 @@ failure_exec = executable( 'parse_fail_test'
 					 ]
 			 )
 
+success_exec = executable( 'parse_success_test'
+			 , 'parser_success.c'
+			 , dependencies: [ ircmsg_dep
+					 , cmocka_dep
+					 , ircmsg_test_dep
+					 ]
+			 )
+
 test('parse failures', failure_exec)
+test('parse successes', success_exec)

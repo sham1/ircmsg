@@ -218,7 +218,7 @@ are_msgs_equal(const struct irc_msg *msg1, const struct irc_msg *msg2)
 		        char *param2 = msg2->params[i];
 			if (strcmp(param1, param2) != 0) return false;
 		}
-	} else if (msg1->params == NULL && msg2->prefix != NULL) {
+	} else if ((msg1->params == NULL) && (msg2->params != NULL)) {
 		return false;
 	}
 
@@ -245,7 +245,7 @@ append_tag(struct irc_tag *tag, struct irc_tag ***tags)
 	size_t old_len = ptrarr_len((const void **) *tags);
 	size_t new_len = old_len + 1;
         ptrarr_resize((void ***) tags, new_len);
-	(*tags)[new_len] = tag;
+	(*tags)[old_len] = tag;
 }
 
 void

@@ -88,6 +88,7 @@ ircmsg_parse(const uint8_t *buf,
 	size_t bytes_consumed = 0;
 
 	bool hit_error = false;
+	bool message_started = false;
 	parsing_state current_state = SEARCHING_TAGS_PREFIX_COMMAND;
 
 	const uint8_t *head = buf;
@@ -134,9 +135,23 @@ ircmsg_parse(const uint8_t *buf,
 			}
 			if (iter != (buf + buf_size) - 1) {
 				if (was_lf && *(iter + 1) == '\r') {
-					++bytes_consumed;
-					++iter;
+					bytes_consumed += 2;
+					iter += 2;
 				        if (current_state >= PARSING_COMMAND) {
+						switch (current_state) {
+						case PARSING_COMMAND:
+							cbs->on_command(head, iter - head - 2, user_data);
+							break;
+						case PARSING_PARAMS:
+						case PARSING_TRAILING_PARAM:
+							cbs->on_param(head, iter - head - 2, user_data);
+							break;
+						case SEARCHING_PARAMS:
+							break;
+						default:
+							// Shouldn't happen!
+							break;
+						}
 						cbs->end_message(user_data);
 					} else if (current_state > SEARCHING_TAGS_PREFIX_COMMAND) {
 						cbs->on_error(IRCMSG_ERR_PARSER_UNEXPECTED_END_OF_MESSAGE, user_data);
@@ -148,9 +163,23 @@ ircmsg_parse(const uint8_t *buf,
 					}
 					break;
 				} else if (was_cr && *(iter + 1) == '\n') {
-					++bytes_consumed;
-					++iter;
+					bytes_consumed += 2;
+					iter += 2;
 				        if (current_state >= PARSING_COMMAND) {
+						switch (current_state) {
+						case PARSING_COMMAND:
+							cbs->on_command(head, iter - head - 2, user_data);
+							break;
+						case PARSING_PARAMS:
+						case PARSING_TRAILING_PARAM:
+							cbs->on_param(head, iter - head - 2, user_data);
+							break;
+						case SEARCHING_PARAMS:
+							break;
+						default:
+							// Shouldn't happen!
+							break;
+						}
 						cbs->end_message(user_data);
 					} else if (current_state > SEARCHING_TAGS_PREFIX_COMMAND) {
 						cbs->on_error(IRCMSG_ERR_PARSER_UNEXPECTED_END_OF_MESSAGE, user_data);
@@ -171,6 +200,20 @@ ircmsg_parse(const uint8_t *buf,
 					break;
 				} else {
 					if (current_state >= PARSING_COMMAND) {
+						switch (current_state) {
+						case PARSING_COMMAND:
+							cbs->on_command(head, iter - head - 1, user_data);
+							break;
+						case PARSING_PARAMS:
+						case PARSING_TRAILING_PARAM:
+							cbs->on_param(head, iter - head - 1, user_data);
+							break;
+						case SEARCHING_PARAMS:
+							break;
+						default:
+							// Shouldn't happen!
+							break;
+						}
 						cbs->end_message(user_data);
 					} else if (current_state > SEARCHING_TAGS_PREFIX_COMMAND) {
 						cbs->on_error(IRCMSG_ERR_PARSER_UNEXPECTED_END_OF_MESSAGE, user_data);
@@ -184,6 +227,20 @@ ircmsg_parse(const uint8_t *buf,
 				}
 			} else {
 				if (current_state >= PARSING_COMMAND) {
+					switch (current_state) {
+					case PARSING_COMMAND:
+						cbs->on_command(head, iter - head - 1, user_data);
+						break;
+					case PARSING_PARAMS:
+					case PARSING_TRAILING_PARAM:
+						cbs->on_param(head, iter - head - 1, user_data);
+						break;
+					case SEARCHING_PARAMS:
+						break;
+					default:
+						// Shouldn't happen!
+						break;
+					}
 					cbs->end_message(user_data);
 					break;
 				} else {
@@ -198,6 +255,7 @@ ircmsg_parse(const uint8_t *buf,
 		if (*iter == 0x40 && current_state == SEARCHING_TAGS_PREFIX_COMMAND) {
 			current_state = PARSING_TAGS;
 			cbs->start_message(user_data);
+			message_started = true;
 			cbs->start_tags(user_data);
 			head = iter + 1;
 
@@ -217,6 +275,10 @@ ircmsg_parse(const uint8_t *buf,
 		    (current_state == SEARCHING_TAGS_PREFIX_COMMAND ||
 		     current_state == SEARCHING_PREFIX_COMMAND)) {
 			current_state = PARSING_PREFIX;
+			if (!message_started) {
+				cbs->start_message(user_data);
+				message_started = true;
+			}
 			head = iter + 1;
 			continue;
 		}
@@ -226,14 +288,18 @@ ircmsg_parse(const uint8_t *buf,
 		    ((current_state == SEARCHING_TAGS_PREFIX_COMMAND) ||
 		     (current_state == SEARCHING_PREFIX_COMMAND) ||
 		     (current_state == SEARCHING_COMMAND))) {
+			if (!message_started) {
+				cbs->start_message(user_data);
+				message_started = true;
+			}
 			current_state = PARSING_COMMAND;
-			head = iter + 1;
+			head = iter;
 			continue;
 		}
 	}
 
 	if ((current_state == SEARCHING_TAGS_PREFIX_COMMAND && !hit_error) ||
-	    (current_state < SEARCHING_PARAMS && !hit_error)) {
+	    (current_state < SEARCHING_COMMAND && !hit_error)) {
 		cbs->on_error(IRCMSG_ERR_PARSER_UNEXPECTED_END_OF_MESSAGE, user_data);
 		hit_error = true;
 	}
