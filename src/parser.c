@@ -97,13 +97,17 @@ ircmsg_parse(const uint8_t *buf,
 		// character to seek for the next message token.
 		if ((current_state != PARSING_TRAILING_PARAM) && is_irc_whitespace (*iter)) {
 			// Special consideration is needed if we're currently
-			// parsing tags.
+			// parsing something.
 			if (current_state == PARSING_TAGS) {
 				if (head != iter) {
 					parse_tag(head, iter, cbs, user_data);
 					head = iter + 1;
 					current_state = SEARCHING_PREFIX_COMMAND;
 				}
+			} else if (current_state == PARSING_PREFIX) {
+				cbs->on_prefix(head, iter - head, user_data);
+				head = iter + 1;
+				current_state = SEARCHING_COMMAND;
 			} else {
 				head = iter + 1;
 			}
@@ -203,7 +207,15 @@ ircmsg_parse(const uint8_t *buf,
 			}
 			continue;
 		}
+
+		// Now comes the prefix.
+		if (*iter == ':' &&
+		    (current_state == SEARCHING_TAGS_PREFIX_COMMAND ||
+		     current_state == SEARCHING_PREFIX_COMMAND)) {
+			current_state = PARSING_PREFIX;
+			head = iter + 1;
 		}
+
 	}
 
 	if ((current_state == SEARCHING_TAGS_PREFIX_COMMAND && !hit_error) ||
