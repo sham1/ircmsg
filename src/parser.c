@@ -108,6 +108,10 @@ ircmsg_parse(const uint8_t *buf,
 				cbs->on_prefix(head, iter - head, user_data);
 				head = iter + 1;
 				current_state = SEARCHING_COMMAND;
+			} else if (current_state == PARSING_COMMAND) {
+				cbs->on_command(head, iter - head, user_data);
+				head = iter + 1;
+				current_state = SEARCHING_PARAMS;
 			} else {
 				head = iter + 1;
 			}
@@ -214,8 +218,18 @@ ircmsg_parse(const uint8_t *buf,
 		     current_state == SEARCHING_PREFIX_COMMAND)) {
 			current_state = PARSING_PREFIX;
 			head = iter + 1;
+			continue;
 		}
 
+		// Now comes the command.
+		if (!is_irc_whitespace(*iter) &&
+		    ((current_state == SEARCHING_TAGS_PREFIX_COMMAND) ||
+		     (current_state == SEARCHING_PREFIX_COMMAND) ||
+		     (current_state == SEARCHING_COMMAND))) {
+			current_state = PARSING_COMMAND;
+			head = iter + 1;
+			continue;
+		}
 	}
 
 	if ((current_state == SEARCHING_TAGS_PREFIX_COMMAND && !hit_error) ||
