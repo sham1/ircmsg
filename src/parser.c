@@ -191,7 +191,7 @@ ircmsg_parse(const uint8_t *buf,
 
 		// IRCv3 introduced so-called "tags" to messages. These tags are optional,
 		// but if they are present, the byte to indicate as much is 0x40 '@'.
-		if (*iter == 0x40) {
+		if (*iter == 0x40 && current_state == SEARCHING_TAGS_PREFIX_COMMAND) {
 			current_state = PARSING_TAGS;
 			cbs->start_message(user_data);
 			cbs->start_tags(user_data);
