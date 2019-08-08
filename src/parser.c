@@ -306,3 +306,72 @@ ircmsg_parse(const uint8_t *buf,
 
 	return hit_error ? 0 : bytes_consumed;
 }
+
+static uint8_t
+byte_unescapes_to (uint8_t byte)
+{
+	// Explanations above.
+	switch(byte)
+	{
+	case ':':
+		return ';';
+	case 's':
+		return ' ';
+	case '\\':
+		return '\\';
+	case 'r':
+		return '\r';
+	case 'n':
+		return '\n';
+	default:
+		return byte;
+	}
+}
+
+size_t
+ircmsg_tag_value_unescaped_size(const uint8_t *esc_value,
+				size_t esc_value_len)
+{
+	if (esc_value == NULL || esc_value_len == 0) return 0;
+
+	size_t bytes_needed = 0;
+	for (const uint8_t *iter = esc_value; iter < esc_value + esc_value_len; ++iter) {
+		if (*iter == '\\') {
+			if (iter == (esc_value + esc_value_len - 1)) {
+				break;
+			} else {
+				++iter;
+			        ++bytes_needed;
+			}
+		} else {
+			++bytes_needed;
+		}
+	}
+
+	return bytes_needed;
+}
+
+uint8_t *
+ircmsg_tag_value_unescape(const uint8_t *esc_value,
+			  size_t esc_value_len,
+			  uint8_t *buf,
+			  size_t buf_len)
+{
+	if (esc_value == NULL || esc_value_len == 0) return NULL;
+	size_t buf_index = 0;
+
+	for (const uint8_t *iter = esc_value; iter < esc_value + esc_value_len; ++iter) {
+		if (*iter == '\\') {
+			if (iter == (esc_value + esc_value_len - 1)) {
+				break;
+			} else {
+				++iter;
+			        buf[buf_index++] = byte_unescapes_to(*iter);
+			}
+		} else {
+		        buf[buf_index++] = *iter;
+		}
+	}
+
+        return buf;
+}

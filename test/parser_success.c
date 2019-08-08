@@ -74,8 +74,10 @@ static void
 test_all (void **state)
 {
 	struct irc_tag tag1 = { .name = "foo", .value = "bar" };
+	struct irc_tag tag2 = { .name = "baz", .value = "quux " };
 	struct irc_tag *expected_tags_arr[] = {
 	        &tag1,
+		&tag2,
 		NULL,
 	};
 	struct irc_msg expected = {
@@ -86,7 +88,7 @@ test_all (void **state)
 	};
 
 	struct irc_test *test_struct = *state;
-        const char *command_str = "@foo=bar :hello\tfoo@bar PRIVMSG\r\n";
+        const char *command_str = "@foo=bar;baz=quux\\s\\ :hello\tfoo@bar PRIVMSG\r\n";
 	size_t consumed = ircmsg_parse((const uint8_t *) command_str,
 				       strlen(command_str),
 				       &test_cbs,

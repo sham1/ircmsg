@@ -70,4 +70,30 @@ ircmsg_parse(const uint8_t *buf,
 	     const ircmsg_parser_callbacks *cbs,
 	     void *user_data);
 
+/*
+ * This function tells the user how big a byte buffer has to be
+ * to contain the passed tag value when said value gets unescaped.
+ *
+ * The value returned does not contain space for a NUL byte.
+ */
+size_t
+ircmsg_tag_value_unescaped_size(const uint8_t *esc_value,
+				size_t esc_value_len);
+
+/*
+ * This function unescapes a tag from `esc_value` to
+ * buf.
+ * The `buf_len` has to be greater than or equal to the value
+ * that would be gotten from `ircmsg_tag_value_unescaped_size` for
+ * the `esc_value` and `esc_value_len` -pair.
+ *
+ * Returns `buf` or `NULL` when `esc_value` is `NULL` or
+ * when `esc_value_len` is `0`.
+ */
+uint8_t *
+ircmsg_tag_value_unescape(const uint8_t *esc_value,
+			  size_t esc_value_len,
+			  uint8_t *buf,
+			  size_t buf_len);
+
 #endif /* ircmsg/parser.h */

@@ -54,10 +54,15 @@ test_on_tag(const uint8_t *name, size_t name_len,
 	struct irc_test *test_data = user_data;
 	struct irc_msg *msg = test_data->msg;
 
-	// TODO: Decode escaped value properly.
 	struct irc_tag *tag = calloc(1, sizeof(*tag));
 	tag->name = alloc_strlen((const char *) name, name_len);
-	tag->value = alloc_strlen((const char *) esc_value, esc_value_len);
+
+	size_t value_len = ircmsg_tag_value_unescaped_size(esc_value, esc_value_len);
+	tag->value = calloc(value_len + 1, sizeof(*tag->value));
+
+	ircmsg_tag_value_unescape(esc_value, esc_value_len,
+				  (uint8_t *) tag->value, value_len);
+
 	append_tag(tag, &msg->tags);
 }
 
@@ -264,6 +269,8 @@ free_tags(struct irc_tag **tags)
 
 	size_t tags_len = ptrarr_len((const void **) tags);
 	for (size_t i = 0; i < tags_len; ++i) {
+		free(tags[i]->name);
+		free(tags[i]->value);
 		free(tags[i]);
 	}
 	free(tags);
