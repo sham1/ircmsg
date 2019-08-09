@@ -22,12 +22,29 @@
 #include <string.h>
 #include <stdlib.h>
 
+static size_t
+ptrarr_len(const void **ptrarr)
+{
+	size_t count = 0;
+	for (const void **iter = ptrarr; *iter != NULL; ++iter) {
+		++count;
+	}
+	return count;
+}
+
+static void
+ptrarr_resize(void ***ptrarr, size_t new_size)
+{
+	*ptrarr = realloc(*ptrarr, (new_size + 1) * sizeof(**ptrarr));
+	(*ptrarr)[new_size] = NULL;
+}
+
 static char *
 alloc_strlen(const char *str, size_t len)
 {
-	if (str == NULL || len == 0) return NULL;
 	char *ret = calloc(len + 1, sizeof(*ret));
-	memcpy(ret, str, len);
+	if (str != NULL)
+		memcpy(ret, str, len);
 	return ret;
 }
 
@@ -54,16 +71,35 @@ test_on_tag(const uint8_t *name, size_t name_len,
 	struct irc_test *test_data = user_data;
 	struct irc_msg *msg = test_data->msg;
 
-	struct irc_tag *tag = calloc(1, sizeof(*tag));
-	tag->name = alloc_strlen((const char *) name, name_len);
+	// If the tag name is unique (as in hasn't been seen before)
+	// allocate a new tag.
+	bool is_duplicate = false;
+
+	struct irc_tag *tag = NULL;
+	char *current_name = alloc_strlen((const char *) name, name_len);
+	for (size_t i = 0; i < ptrarr_len((const void **)msg->tags); ++i) {
+		tag = msg->tags[i];
+		if (strcmp(tag->name, current_name) == 0) {
+			free(current_name);
+			is_duplicate = true;
+			break;
+		}
+	}
+	if (!is_duplicate) {
+		tag = calloc(1, sizeof(*tag));
+		tag->name = current_name;
+	}
 
 	size_t value_len = ircmsg_tag_value_unescaped_size(esc_value, esc_value_len);
+	if (is_duplicate) {
+		free(tag->value);
+	}
 	tag->value = value_len > 0 ? calloc(value_len + 1, sizeof(*tag->value)) : NULL;
 
 	ircmsg_tag_value_unescape(esc_value, esc_value_len,
 				  (uint8_t *) tag->value, value_len);
 
-	append_tag(tag, &msg->tags);
+	if (!is_duplicate) append_tag(tag, &msg->tags);
 }
 
 void
@@ -154,23 +190,6 @@ ircmsg_parser_callbacks test_cbs = {
 
 	.on_error = test_on_error,
 };
-
-static size_t
-ptrarr_len(const void **ptrarr)
-{
-	size_t count = 0;
-	for (const void **iter = ptrarr; *iter != NULL; ++iter) {
-		++count;
-	}
-	return count;
-}
-
-static void
-ptrarr_resize(void ***ptrarr, size_t new_size)
-{
-	*ptrarr = realloc(*ptrarr, (new_size + 1) * sizeof(**ptrarr));
-	(*ptrarr)[new_size] = NULL;
-}
 
 bool
 are_tags_equal(const struct irc_tag *tag1, const struct irc_tag *tag2)

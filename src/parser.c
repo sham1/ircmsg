@@ -56,6 +56,8 @@ parse_tag(const uint8_t *head,
 		}
 	}
 
+	if (name_len == 0) name_len = iter - name_head;
+
 	if (value_head != NULL) {
 		value_len = iter - value_head;
 	}
@@ -245,6 +247,9 @@ ircmsg_parse(const uint8_t *buf,
 						cbs->on_command(head, iter - head - 1, user_data);
 						break;
 					case PARSING_PARAMS:
+						cbs->on_param(head, iter - head - 1, user_data);
+						cbs->end_params(user_data);
+						break;
 					case PARSING_TRAILING_PARAM:
 						cbs->on_param(head, iter - head - 1, user_data);
 						cbs->end_params(user_data);

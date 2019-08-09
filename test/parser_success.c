@@ -117,3 +117,4 @@ main (int argc, char **argv)
 
 	return cmocka_run_group_tests_name("parse_success_test", tests, NULL, NULL);
 }
+

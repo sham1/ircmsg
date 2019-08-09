@@ -26,3 +26,5 @@ success_exec = executable( 'parse_success_test'
 
 test('parse failures', failure_exec)
 test('parse successes', success_exec)
+
+subdir('compliance-tests')
