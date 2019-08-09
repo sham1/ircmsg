@@ -58,7 +58,7 @@ test_on_tag(const uint8_t *name, size_t name_len,
 	tag->name = alloc_strlen((const char *) name, name_len);
 
 	size_t value_len = ircmsg_tag_value_unescaped_size(esc_value, esc_value_len);
-	tag->value = calloc(value_len + 1, sizeof(*tag->value));
+	tag->value = value_len > 0 ? calloc(value_len + 1, sizeof(*tag->value)) : NULL;
 
 	ircmsg_tag_value_unescape(esc_value, esc_value_len,
 				  (uint8_t *) tag->value, value_len);

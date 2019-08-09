@@ -60,6 +60,11 @@ parse_tag(const uint8_t *head,
 		value_len = iter - value_head;
 	}
 
+	// Empty tag values and no tag values are equivalent.
+	if (value_len == 0) {
+		value_head = NULL;
+	}
+
 	cbs->on_tag(name_head, name_len, value_head, value_len, user_data);
 }
 
