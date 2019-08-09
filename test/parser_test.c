@@ -259,7 +259,7 @@ append_param(char *param, char ***params)
 	size_t old_len = ptrarr_len((const void **) *params);
 	size_t new_len = old_len + 1;
         ptrarr_resize((void ***) params, new_len);
-	*params[new_len] = param;
+	(*params)[old_len] = param;
 }
 
 void

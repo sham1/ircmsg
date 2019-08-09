@@ -94,6 +94,7 @@ ircmsg_parse(const uint8_t *buf,
 
 	bool hit_error = false;
 	bool message_started = false;
+	bool params_started = false;
 	parsing_state current_state = SEARCHING_TAGS_PREFIX_COMMAND;
 
 	const uint8_t *head = buf;
@@ -116,6 +117,10 @@ ircmsg_parse(const uint8_t *buf,
 				current_state = SEARCHING_COMMAND;
 			} else if (current_state == PARSING_COMMAND) {
 				cbs->on_command(head, iter - head, user_data);
+				head = iter + 1;
+				current_state = SEARCHING_PARAMS;
+			} else if (current_state == PARSING_PARAMS) {
+				cbs->on_param(head, iter-head, user_data);
 				head = iter + 1;
 				current_state = SEARCHING_PARAMS;
 			} else {
@@ -150,6 +155,7 @@ ircmsg_parse(const uint8_t *buf,
 						case PARSING_PARAMS:
 						case PARSING_TRAILING_PARAM:
 							cbs->on_param(head, iter - head - 2, user_data);
+							cbs->end_params(user_data);
 							break;
 						case SEARCHING_PARAMS:
 							break;
@@ -178,6 +184,7 @@ ircmsg_parse(const uint8_t *buf,
 						case PARSING_PARAMS:
 						case PARSING_TRAILING_PARAM:
 							cbs->on_param(head, iter - head - 2, user_data);
+							cbs->end_params(user_data);
 							break;
 						case SEARCHING_PARAMS:
 							break;
@@ -212,6 +219,7 @@ ircmsg_parse(const uint8_t *buf,
 						case PARSING_PARAMS:
 						case PARSING_TRAILING_PARAM:
 							cbs->on_param(head, iter - head - 1, user_data);
+							cbs->end_params(user_data);
 							break;
 						case SEARCHING_PARAMS:
 							break;
@@ -239,6 +247,7 @@ ircmsg_parse(const uint8_t *buf,
 					case PARSING_PARAMS:
 					case PARSING_TRAILING_PARAM:
 						cbs->on_param(head, iter - head - 1, user_data);
+						cbs->end_params(user_data);
 						break;
 					case SEARCHING_PARAMS:
 						break;
@@ -300,6 +309,36 @@ ircmsg_parse(const uint8_t *buf,
 			current_state = PARSING_COMMAND;
 			head = iter;
 			continue;
+		}
+
+		// Now we're at the params.
+		if (current_state == SEARCHING_PARAMS) {
+			// If we encounter a colon, that means that we have the
+			// trailing argument.
+			if (*iter == ':') {
+				if (!params_started) {
+					cbs->start_params(user_data);
+					params_started = true;
+				}
+
+				head = iter + 1;
+				current_state = PARSING_TRAILING_PARAM;
+				continue;
+			}
+
+			// Otherwise, if we encounter a non-whitespace,
+			// make it a param.
+			if (!is_irc_whitespace(*iter)) {
+				head = iter;
+				current_state = PARSING_PARAMS;
+
+				if (!params_started) {
+					cbs->start_params(user_data);
+					params_started = true;
+				}
+
+				continue;
+			}
 		}
 	}
 

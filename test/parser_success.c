@@ -80,15 +80,20 @@ test_all (void **state)
 		&tag2,
 		NULL,
 	};
+	char *params[] = {
+		"test_param",
+		"test_trailing   ",
+		NULL,
+	};
 	struct irc_msg expected = {
 		.tags = expected_tags_arr,
 		.prefix = "hello\tfoo@bar",
 		.command = "PRIVMSG",
-		.params = NULL,
+		.params = params,
 	};
 
 	struct irc_test *test_struct = *state;
-        const char *command_str = "@foo=bar;baz=quux\\s\\ :hello\tfoo@bar PRIVMSG\r\n";
+        const char *command_str = "@foo=bar;baz=quux\\s\\ :hello\tfoo@bar PRIVMSG test_param :test_trailing   \r\n";
 	size_t consumed = ircmsg_parse((const uint8_t *) command_str,
 				       strlen(command_str),
 				       &test_cbs,
