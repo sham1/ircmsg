@@ -15,4 +15,6 @@ ircmsg_dep = declare_dependency( link_with: ircmsg_lib
                                , include_directories: incdir
                                )
 
-subdir('test')
+if get_option('tests')
+  subdir('test')
+endif
