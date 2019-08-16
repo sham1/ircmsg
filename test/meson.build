@@ -2,6 +2,7 @@ cmocka_dep = dependency('cmocka')
 
 ircmsg_test_lib = static_library( 'ircmsg_test_internal'
 				, 'parser_test.c'
+				, 'serializer_test.c'
 				, dependencies: [ ircmsg_dep
 						]
 				)
@@ -24,7 +25,16 @@ success_exec = executable( 'parse_success_test'
 					 ]
 			 )
 
+serialize_len_exec = executable( 'serialize_length_test'
+			       , 'serializer_length.c'
+			       , dependencies: [ ircmsg_dep
+					       , cmocka_dep
+					       , ircmsg_test_dep
+					       ]
+			       )
+
 test('parse failures', failure_exec)
 test('parse successes', success_exec)
+test('serializer length', serialize_len_exec)
 
 subdir('compliance-tests')
