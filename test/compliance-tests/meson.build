@@ -21,3 +21,25 @@ split_test_exec = executable( 'split_test_exec'
 			    )
 
 test('split compliant', split_test_exec)
+
+join_test_c = custom_target( 'join_test.c'
+			   , output: 'join_test.c'
+			   , input: [ 'join_test.py'
+				    , 'yaml/msg-join.yaml'
+				    , 'join_test.c.in'
+				    ]
+			   , command: [ prog_python
+				      , '@INPUT@'
+				      , '@OUTPUT@'
+				      ]
+			   )
+
+join_test_exec = executable( 'join_test_exec'
+			   , join_test_c
+			   , dependencies: [ ircmsg_dep
+					   , cmocka_dep
+					   , ircmsg_test_dep
+					   ]
+			   )
+
+test('join compliant', join_test_exec)

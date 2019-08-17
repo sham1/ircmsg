@@ -1,0 +1,79 @@
+// Copyright (c) 2019 Jani Juhani Sinervo
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a
+//  copy of this software and associated documentation files (the "Software"),
+//  to deal in the Software without restriction, including without limitation
+//  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+//  and/or sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//  DEALINGS IN THE SOFTWARE.
+
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <setjmp.h>
+#include <cmocka.h>
+#include <string.h>
+#include <stdbool.h>
+#include <ircmsg/parser.h>
+#include <stdio.h>
+#include "../serializer_test.h"
+
+static bool
+matches_any_length (const char **matches,
+		    size_t matches_count,
+		    size_t serialized_len)
+{{
+	for (size_t i = 0; i < matches_count; ++i) {{
+		const char *match = matches[i];
+		size_t match_len = strlen(match);
+		if (match_len == serialized_len) return true;
+	}}
+	return false;
+}}
+
+static bool
+matches_any (const char **matches,
+	     size_t matches_count,
+	     char *serialized)
+{{
+	for (size_t i = 0; i < matches_count; ++i) {{
+		const char *match = matches[i];
+		if (strcmp(match, serialized) == 0) return true;
+	}}
+	return false;
+}}
+
+static int
+serializer_basic_setup (void **state)
+{{
+	return 0;
+}}
+
+static int
+serializer_basic_teardown (void **state)
+{{
+	return 0;
+}}
+
+{tests}
+
+int
+main (int argc, char **argv)
+{{
+	const struct CMUnitTest tests[] = {{
+		{test_setups}
+	}};
+
+	return cmocka_run_group_tests_name("join_test", tests, NULL, NULL);
+}}
