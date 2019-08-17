@@ -33,8 +33,17 @@ serialize_len_exec = executable( 'serialize_length_test'
 					       ]
 			       )
 
+serialize_basic_exec = executable( 'serialize_basic_test'
+				 , 'serializer_basic.c'
+				 , dependencies: [ ircmsg_dep
+						 , cmocka_dep
+						 , ircmsg_test_dep
+						 ]
+				 )
+
 test('parse failures', failure_exec)
 test('parse successes', success_exec)
 test('serializer length', serialize_len_exec)
+test('serializer basic', serialize_basic_exec)
 
 subdir('compliance-tests')
