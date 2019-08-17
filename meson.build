@@ -1,6 +1,6 @@
 project('ircmsg', 'c',
 	default_options: ['c_std=c99'],
-	version: '0.2.0')
+	version: '1.0.0')
 
 incdir = include_directories('include')
 
@@ -9,7 +9,7 @@ ircmsg_lib = library( 'ircmsg'
 		    , 'src/serializer.c'
                     , install: true
                     , include_directories: incdir
-		    , version: '0.2.0'
+		    , version: '1.0.0'
                     )
 
 install_subdir('include/ircmsg', install_dir: get_option('includedir'))
