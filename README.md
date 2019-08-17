@@ -1,7 +1,7 @@
 ircmsg
 ======
 
-A dynamic-allocation free C99-compatible IRC parsing library.
+A dynamic-allocation free C99-compatible IRC message library.
 
 Why use this library
 ====================
@@ -24,9 +24,10 @@ messages.
 * It's IRCv3 compliant
 
 One of the design goals of `ircmsg` was for it to be able to be used
-for parsing modern IRC messages with tags. By having this feature,
-higher-level libraries can support modern features such as batched
-messages and even getting the message's arrival time from the server.
+for parsing and serializing modern IRC messages with tags. By having
+this feature, higher-level libraries can support modern features such
+as batched messages and even getting the message's arrival time from
+the server.
 
 * It's free software
 
@@ -39,8 +40,3 @@ Usage
 To find out how to use this library, look either at your software
 distribution's documentation directory or the `ircmsg` GIT repository's
 `docs`-directory.
-
-Project enhancement ideas
-=========================
-
-* Adding the ability to serialize IRC messages.
