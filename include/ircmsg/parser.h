@@ -21,6 +21,10 @@
 #ifndef __PARSER_H_
 #define __PARSER_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -95,5 +99,9 @@ ircmsg_tag_value_unescape(const uint8_t *esc_value,
 			  size_t esc_value_len,
 			  uint8_t *buf,
 			  size_t buf_len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ircmsg/parser.h */

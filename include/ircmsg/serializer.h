@@ -21,6 +21,10 @@
 #ifndef __SERIALIZER_H_
 #define __SERIALIZER_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -54,5 +58,9 @@ ircmsg_serialize(uint8_t *buf,
 size_t
 ircmsg_serialize_buffer_len(const ircmsg_serializer_callbacks *cbs,
 			    void *user_data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ircmsg/serializer.h */
